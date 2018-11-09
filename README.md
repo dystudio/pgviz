@@ -19,4 +19,4 @@ After cloning the project, execute the following commands once you're in the pro
 
 4. Enter your local database credentials on the file `db_credentials.py`. This only works for PostgresQL(version 10.5) database!
 
-5. Run `python main.py`
+5. Run `python server.py`
