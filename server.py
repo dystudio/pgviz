@@ -6,6 +6,7 @@ sys.path.append(root_dir)
 
 from flask import Flask
 from flask_restful import Resource, Api, reqparse
+from flask_cors import CORS
 import psycopg2
 
 from db_credentials import DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD
@@ -14,6 +15,7 @@ from utils.traverse import traverse_json
 
 # Initialize flask application
 app = Flask(__name__)
+CORS(app)
 api = Api(app)
 
 # Connect to database
