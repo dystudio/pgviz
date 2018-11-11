@@ -5,6 +5,6 @@ def connect_to_db(dbname, user, password):
   conn = psycopg2.connect(connect_argument)
   return conn
 
-def get_execution_plan(query):
-  final_query = 'EXPLAIN (FORMAT JSON) ' + query
+def get_explain_query(query):
+  final_query = 'EXPLAIN (FORMAT JSON) ' + query + ';'
   return final_query
