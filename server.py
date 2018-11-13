@@ -20,17 +20,22 @@ api = Api(app)
 
 # Connect to database
 conn = connect_to_db(DATABASE_NAME, DATABASE_USER, DATABASE_PASSWORD)
+conn.autocommit = True
 cur = conn.cursor()
 
 # Define flask endpoint
 class QueryExplainer(Resource):
     def get(self, query):
         final_query = get_explain_query(query)
-        cur.execute(final_query)
-        
-        explain_json = cur.fetchone()
-        result = traverse_json(explain_json[0][0]["Plan"], query)
 
+        try:
+            cur.execute(final_query)
+        except psycopg2.Error as e:
+            result = {}
+        else:
+            explain_json = cur.fetchone()
+            result = traverse_json(explain_json[0][0]["Plan"], query)
+        print('RESULT: ' + str(result))
         return result
 
 api.add_resource(QueryExplainer, '/explain/<string:query>')
