@@ -31,11 +31,11 @@ class QueryExplainer(Resource):
         try:
             cur.execute(final_query)
         except psycopg2.Error as e:
-            result = {}
+            result = {'success': 'false'}
         else:
             explain_json = cur.fetchone()
             result = traverse_json(explain_json[0][0]["Plan"], query)
-        print('RESULT: ' + str(result))
+        
         return result
 
 api.add_resource(QueryExplainer, '/explain/<string:query>')
