@@ -29,7 +29,7 @@ def find_str(s, char):
 def cleanup_cond(filter):
 
     # Replace all type declarations in filter
-    filtered_result = filter.replace("::text", "").replace("::numeric", "").replace("::double precision", "").replace("::timestamp without time zone", "")
+    filtered_result = filter.replace("::text", "").replace("::numeric", "").replace("::double precision", "").replace("::timestamp without time zone", "").replace("::date", "").replace("::bpchar", "")
 
     # Remove all parentheses
     while ('(' in filtered_result) or (')' in filtered_result):
@@ -685,11 +685,21 @@ def process_sort(qep_json, query):
 
     sqlfragments = list()
 
+    sort_key_list = "ORDER BY "
+    counter = 0
+
     # Check if sort key in list of keys
     if "Sort Key" in qep_json.keys():
         for sort_key in qep_json["Sort Key"]:
             sqlfragments.append("ORDER BY " + cleanup_cond(sort_key))
             sqlfragments.append(cleanup_cond(sort_key))
+            if (counter == 0):
+                sort_key_list = sort_key_list + cleanup_cond(sort_key)
+                counter += 1
+            else:
+                sort_key_list = sort_key_list + ", " + cleanup_cond(sort_key)
+    
+        sqlfragments.insert(0, sort_key_list)
 
     '''sqlfragments_temp = reversed(sqlfragments.copy())
 
@@ -849,10 +859,20 @@ def process_aggregate(qep_json, query):
 
     if "Group Key" in qep_json.keys():
         group_key = qep_json["Group Key"]
+
+        group_key_list = "GROUP BY "
+        counter = 0
         
         for key in group_key:
             sqlfragments.append("GROUP BY " + cleanup_cond(key))
             sqlfragments.append(cleanup_cond(key))
+            if (counter == 0):
+                group_key_list = group_key_list + cleanup_cond(key)
+                counter += 1
+            else:
+                group_key_list = group_key_list + ", " + cleanup_cond(key)
+        
+        sqlfragments.insert(0, group_key_list)
     
     # Find matching SQL
     start_index, end_index = search_in_sql(sqlfragments, query)
