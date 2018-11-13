@@ -1,6 +1,6 @@
 '''
 Change according to your local database set up.
 '''
-DATABASE_NAME = 'cz4031'
+DATABASE_NAME = 'dblp'
 DATABASE_USER = 'postgres'
-DATABASE_PASSWORD = 'root'
+DATABASE_PASSWORD = 'postgres'

@@ -939,6 +939,9 @@ def process_hash_join(qep_json, query):
 # Function stops once a match is found
 def search_in_sql(sqlfragments, query):
 
+    # initialize start_index to not be found
+    start_index = -1
+
     print("\nSQL Fragments: " + str(sqlfragments) + "\n")
     # print("\n" + query + "\n")
 
