@@ -685,7 +685,7 @@ def process_sort(qep_json, query):
 
     sqlfragments = list()
 
-    sort_key_list = "ORDER BY "
+    sort_key_list = ""
     counter = 0
 
     # Check if sort key in list of keys
@@ -698,8 +698,11 @@ def process_sort(qep_json, query):
                 counter += 1
             else:
                 sort_key_list = sort_key_list + ", " + cleanup_cond(sort_key)
-    
-        sqlfragments.insert(0, sort_key_list)
+                counter += 1
+
+        if (counter > 1):
+            sqlfragments.insert(0, sort_key_list)
+            sqlfragments.insert(0, "ORDER BY " + sort_key_list)
 
     '''sqlfragments_temp = reversed(sqlfragments.copy())
 
@@ -865,15 +868,18 @@ def process_aggregate(qep_json, query):
         
         for key in group_key:
             sqlfragments.append("GROUP BY " + cleanup_cond(key))
+            sqlfragments.append("DISTINCT " + cleanup_cond(key))
             sqlfragments.append(cleanup_cond(key))
             if (counter == 0):
                 group_key_list = group_key_list + cleanup_cond(key)
                 counter += 1
             else:
                 group_key_list = group_key_list + ", " + cleanup_cond(key)
-    
-        sqlfragments.insert(0, group_key_list)
-        sqlfragments.insert(0, "GROUP BY " + group_key_list)
+                counter += 1
+
+        if (counter > 1):
+            sqlfragments.insert(0, group_key_list)
+            sqlfragments.insert(0, "GROUP BY " + group_key_list)
     
     # Find matching SQL
     start_index, end_index = search_in_sql(sqlfragments, query)

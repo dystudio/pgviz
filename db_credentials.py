@@ -3,4 +3,4 @@ Change according to your local database set up.
 '''
 DATABASE_NAME = 'dblp'
 DATABASE_USER = 'postgres'
-DATABASE_PASSWORD = '@@@@@@@4lex4ndeR'
+DATABASE_PASSWORD = 'postgres'
