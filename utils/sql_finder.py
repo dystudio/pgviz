@@ -860,7 +860,7 @@ def process_aggregate(qep_json, query):
     if "Group Key" in qep_json.keys():
         group_key = qep_json["Group Key"]
 
-        group_key_list = "GROUP BY "
+        group_key_list = ""
         counter = 0
         
         for key in group_key:
@@ -871,8 +871,9 @@ def process_aggregate(qep_json, query):
                 counter += 1
             else:
                 group_key_list = group_key_list + ", " + cleanup_cond(key)
-        
+    
         sqlfragments.insert(0, group_key_list)
+        sqlfragments.insert(0, "GROUP BY " + group_key_list)
     
     # Find matching SQL
     start_index, end_index = search_in_sql(sqlfragments, query)
