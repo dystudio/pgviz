@@ -704,6 +704,8 @@ def process_sort(qep_json, query):
             sqlfragments.insert(0, sort_key_list)
             sqlfragments.insert(0, "ORDER BY " + sort_key_list)
 
+        sqlfragments = resolve_relation(sqlfragments, qep_json)
+
     '''sqlfragments_temp = reversed(sqlfragments.copy())
 
     if sqlfragments_temp is not None:
@@ -880,6 +882,8 @@ def process_aggregate(qep_json, query):
         if (counter > 1):
             sqlfragments.insert(0, group_key_list)
             sqlfragments.insert(0, "GROUP BY " + group_key_list)
+
+        sqlfragments = resolve_relation(sqlfragments, qep_json)
     
     # Find matching SQL
     start_index, end_index = search_in_sql(sqlfragments, query)
@@ -977,6 +981,7 @@ def search_in_sql(sqlfragments, query):
         start_index = find_str(query.lower(), sqlfragment.lower())
 
         if start_index is not -1:
+            
             end_index = start_index + len(sqlfragment)
             print("Start index is " + str(start_index) + " and end index is " + str(end_index))
             print("Matching SQL is: " + query[start_index : end_index] + "\n")
@@ -996,7 +1001,7 @@ def resolve_relation(sqlfragments, qep_json):
     for sqlfragment in sqlfragments_temp:
         sqlwords = sqlfragment.split()
 
-        for operator in ['=', '!=', '<', '>', '<>', '>=', '<=', '!<', '!>', 'IS', 'NOT', 'IN', 'LIKE']:
+        for operator in ['=', '!=', '<', '>', '<>', '>=', '<=', '!<', '!>', 'IS', 'NOT', 'IN', 'LIKE', 'BY']:
 
             n = 0
 
@@ -1007,10 +1012,18 @@ def resolve_relation(sqlfragments, qep_json):
                     n += 1
 
                     if nth_index(sqlwords, operator, n) > 0 and nth_index(sqlwords, operator, n) < len(sqlwords) - 1:
-                        if '.' not in sqlwords[nth_index(sqlwords, operator, n) - 1]:
-                            sqlwords[nth_index(sqlwords, operator, n) - 1] = qep_json["Relation Name"] + "." + sqlwords[nth_index(sqlwords, operator, n) - 1]
-                        if '.' not in sqlwords[nth_index(sqlwords, operator, n) + 1] and sqlwords[nth_index(sqlwords, operator, n) + 1].isidentifier():
-                            sqlwords[nth_index(sqlwords, operator, n) + 1] = qep_json["Relation Name"] + "." + sqlwords[nth_index(sqlwords, operator, n) + 1]
+                        if qep_json["Node Type"] == "Sort" or qep_json["Node Type"] == "Aggregate":
+                            print(qep_json["Plans"][0])
+                            if "Relation Name" in qep_json["Plans"][0].keys():
+                                if '.' not in sqlwords[nth_index(sqlwords, operator, n) - 1]:
+                                    sqlwords[nth_index(sqlwords, operator, n) - 1] = qep_json["Plans"][0]["Relation Name"] + "." + sqlwords[nth_index(sqlwords, operator, n) - 1]
+                                if '.' not in sqlwords[nth_index(sqlwords, operator, n) + 1] and sqlwords[nth_index(sqlwords, operator, n) + 1].isidentifier():
+                                    sqlwords[nth_index(sqlwords, operator, n) + 1] = qep_json["Plans"][0]["Relation Name"] + "." + sqlwords[nth_index(sqlwords, operator, n) + 1]
+                        else:
+                            if '.' not in sqlwords[nth_index(sqlwords, operator, n) - 1]:
+                                sqlwords[nth_index(sqlwords, operator, n) - 1] = qep_json["Relation Name"] + "." + sqlwords[nth_index(sqlwords, operator, n) - 1]
+                            if '.' not in sqlwords[nth_index(sqlwords, operator, n) + 1] and sqlwords[nth_index(sqlwords, operator, n) + 1].isidentifier():
+                                sqlwords[nth_index(sqlwords, operator, n) + 1] = qep_json["Relation Name"] + "." + sqlwords[nth_index(sqlwords, operator, n) + 1]
 
         sqlfragment_new = ' '.join(sqlwords)
 
